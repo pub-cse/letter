@@ -1,0 +1,33 @@
+{
+  "name": "Invoice Template",
+  "settings": {
+    "fontSize": "11",
+    "fontFace": "arial",
+    "pageSize": "a4",
+    "margins": {
+      "top": 0.75,
+      "right": 0.75,
+      "bottom": 0.75,
+      "left": 0.75
+    }
+  },
+  "variables": [
+    {
+      "name": "InvoiceNumber",
+      "value": ""
+    },
+    {
+      "name": "ClientName",
+      "value": ""
+    },
+    {
+      "name": "Amount",
+      "value": ""
+    },
+    {
+      "name": "DueDate",
+      "value": ""
+    }
+  ],
+  "letterContent": "INVOICE\n\nInvoice #: [InvoiceNumber]\nClient: [ClientName]\nAmount Due: [Amount]\nDue Date: [DueDate]\n\nPayment Terms: Net 30\n\nThank you for your business."
+}

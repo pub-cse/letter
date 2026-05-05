@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bulk Letter Generator</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="header">
+      <h1>Bulk Letter Generator</h1>
+    </div>
+    <div class="container">
+      <div class="left-panel">
+        <div class="settings">
+          <h2>Settings</h2>
+          <label for="font-face">Font Face:</label>
+          <select id="font-face" name="font-face">
+            <option value="times-new-roman">Times New Roman</option>
+            <option value="arial">Arial</option>
+            <option value="calibri">Calibri</option>
+          </select>
+          <label for="font-size">Font Size:</label>
+          <input
+            type="number"
+            id="font-size"
+            name="font-size"
+            placeholder="Enter font size in px"
+            value="12"
+          />
+          <label for="page-size">Page Size:</label>
+          <select id="page-size" name="page-size">
+            <option value="a4">A4</option>
+            <option value="letter">Letter</option>
+            <option value="legal">Legal</option>
+          </select>
+          <label>Margins (inch):</label>
+          <div class="margins-row">
+            <input
+              type="number"
+              id="margin-top"
+              name="margin-top"
+              placeholder="Top"
+              value="1"
+            />
+            <input
+              type="number"
+              id="margin-right"
+              name="margin-right"
+              placeholder="Right"
+              value="1"
+            />
+            <input
+              type="number"
+              id="margin-bottom"
+              name="margin-bottom"
+              placeholder="Bottom"
+              value="1"
+            />
+            <input
+              type="number"
+              id="margin-left"
+              name="margin-left"
+              placeholder="Left"
+              value="1"
+            />
+          </div>
+          <label for="template">Select Template:</label>
+          <select id="template" name="template">
+            <option value="">-- Choose a template --</option>
+          </select>
+          <div class="template-actions">
+            <button
+              type="button"
+              id="download-template"
+              class="template-action-button"
+            >
+              Download Template
+            </button>
+            <button
+              type="button"
+              id="upload-template-button"
+              class="template-action-button"
+            >
+              Upload Template
+            </button>
+            <input
+              type="file"
+              id="upload-template-input"
+              accept="application/json,.json"
+              hidden
+            />
+          </div>
+        </div>
+        <div class="additional-info">
+          <h2>Information</h2>
+          <div class="scrollable-content">
+            <div class="variable-section">
+              <h4>Variables</h4>
+              <div class="variable-container" id="variableContainer">
+                <div class="variable-row">
+                  <button class="delete-variable" type="button">−</button>
+                  <input
+                    type="text"
+                    placeholder="Variable Name"
+                    class="variable-name"
+                  />
+                  <input
+                    type="text"
+                    placeholder="Variable Value"
+                    class="variable-value"
+                  />
+                  <button class="add-variable" type="button">+</button>
+                </div>
+              </div>
+            </div>
+            <h4>Letter Content:</h4>
+            <textarea
+              id="letter"
+              name="letter"
+              placeholder="Enter the content of your letter here..."
+            ></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="preview">
+        <h2>Letter Preview</h2>
+        <button type="button" id="print-pdf" class="floating-preview-button">
+          Print PDF
+        </button>
+      </div>
+    </div>
+    <div class="footer">(c) 2026 | Nahid Hasan. All rights reserved.</div>
+
+    <script
+      src="https://kit.fontawesome.com/a076d05399.js"
+      crossorigin="anonymous"
+    ></script>
+    <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>

@@ -1,0 +1,29 @@
+{
+  "name": "Professional Letter",
+  "settings": {
+    "fontSize": "12",
+    "fontFace": "times-new-roman",
+    "pageSize": "letter",
+    "margins": {
+      "top": 1,
+      "right": 1,
+      "bottom": 1,
+      "left": 1
+    }
+  },
+  "variables": [
+    {
+      "name": "RecipientName",
+      "value": ""
+    },
+    {
+      "name": "CompanyName",
+      "value": ""
+    },
+    {
+      "name": "CompanyAddress",
+      "value": ""
+    }
+  ],
+  "letterContent": "Dear [RecipientName],\n\nI hope this letter finds you in good health and spirits.\n\n[YourMessage]\n\nThank you for your time and consideration.\n\nBest regards,\n[YourName]\n[YourTitle]"
+}

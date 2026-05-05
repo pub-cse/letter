@@ -1,0 +1,33 @@
+{
+  "name": "Business Proposal",
+  "settings": {
+    "fontSize": "12",
+    "fontFace": "calibri",
+    "pageSize": "letter",
+    "margins": {
+      "top": 1,
+      "right": 1,
+      "bottom": 1,
+      "left": 1
+    }
+  },
+  "variables": [
+    {
+      "name": "ClientCompany",
+      "value": ""
+    },
+    {
+      "name": "ProjectScope",
+      "value": ""
+    },
+    {
+      "name": "Timeline",
+      "value": ""
+    },
+    {
+      "name": "Budget",
+      "value": ""
+    }
+  ],
+  "letterContent": "BUSINESS PROPOSAL\n\nTo: [ClientCompany]\n\nProject Scope:\n[ProjectScope]\n\nProposed Timeline:\n[Timeline]\n\nBudget:\n[Budget]\n\nWe look forward to discussing this proposal with you."
+}
