@@ -234,6 +234,25 @@ textarea {
   flex-wrap: wrap;
 }
 
+.csv-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.csv-upload-label {
+  font-weight: 700;
+}
+
+.csv-status {
+  font-size: 0.95rem;
+  color: rgba(0, 0, 0, 0.8);
+  background: rgba(255, 255, 255, 0.35);
+  padding: 8px 10px;
+  border-radius: 8px;
+}
+
 .template-action-button {
   border: none;
   border-radius: 10px;

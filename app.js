@@ -17,12 +17,15 @@ let lastPreviewKey = "";
 let currentTemplateSource = null;
 let currentTemplateName = "";
 let uploadedTemplateCounter = 0;
+let csvRows = [];
+let currentPdfBlob = null;
 
 document.addEventListener("DOMContentLoaded", function () {
   loadTemplates();
   setupVariableRowManagement();
   setupPreviewUpdates();
   setupTemplateActions();
+  setupCsvActions();
   setupPrintAction();
   schedulePdfPreviewRender();
 });
@@ -121,6 +124,19 @@ function setupTemplateActions() {
   uploadInput.addEventListener("change", handleTemplateUpload);
 }
 
+function setupCsvActions() {
+  const uploadButton = document.getElementById("upload-csv-button");
+  const uploadInput = document.getElementById("upload-csv-input");
+  const generateButton = document.getElementById("generate-bulk-pdf");
+
+  uploadButton.addEventListener("click", function () {
+    uploadInput.click();
+  });
+
+  uploadInput.addEventListener("change", handleCsvUpload);
+  generateButton.addEventListener("click", generateBulkPdfZip);
+}
+
 function setupPrintAction() {
   const printButton = document.getElementById("print-pdf");
   printButton.addEventListener("click", function () {
@@ -203,6 +219,102 @@ function handleTemplateUpload(event) {
   };
   reader.readAsText(file);
   event.target.value = "";
+}
+
+function handleCsvUpload(event) {
+  const file = event.target.files && event.target.files[0];
+  if (!file) {
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = function () {
+    try {
+      csvRows = parseCsvToObjects(String(reader.result || ""));
+      updateCsvStatus(
+        csvRows.length
+          ? `${csvRows.length} CSV row(s) loaded.`
+          : "CSV uploaded, but no data rows were found.",
+      );
+    } catch (error) {
+      csvRows = [];
+      updateCsvStatus("Invalid CSV file.");
+      alert("Unable to read the CSV file.");
+    }
+  };
+  reader.readAsText(file);
+  event.target.value = "";
+}
+
+function updateCsvStatus(message) {
+  const status = document.getElementById("csv-status");
+  if (status) {
+    status.textContent = message;
+  }
+}
+
+function parseCsvToObjects(csvText) {
+  const rows = parseCsvRows(csvText).filter((row) => row.length > 0);
+  if (rows.length < 2) {
+    return [];
+  }
+
+  const headers = rows[0].map((header) => header.trim());
+  return rows.slice(1).map((row) => {
+    const record = {};
+    headers.forEach((header, index) => {
+      record[header] = (row[index] || "").trim();
+    });
+    return record;
+  });
+}
+
+function parseCsvRows(csvText) {
+  const rows = [];
+  let currentRow = [];
+  let currentCell = "";
+  let insideQuotes = false;
+
+  for (let index = 0; index < csvText.length; index += 1) {
+    const character = csvText[index];
+
+    if (character === '"') {
+      if (insideQuotes && csvText[index + 1] === '"') {
+        currentCell += '"';
+        index += 1;
+      } else {
+        insideQuotes = !insideQuotes;
+      }
+      continue;
+    }
+
+    if (character === "," && !insideQuotes) {
+      currentRow.push(currentCell);
+      currentCell = "";
+      continue;
+    }
+
+    if ((character === "\n" || character === "\r") && !insideQuotes) {
+      if (character === "\r" && csvText[index + 1] === "\n") {
+        index += 1;
+      }
+
+      currentRow.push(currentCell);
+      rows.push(currentRow);
+      currentRow = [];
+      currentCell = "";
+      continue;
+    }
+
+    currentCell += character;
+  }
+
+  if (currentCell.length > 0 || currentRow.length > 0) {
+    currentRow.push(currentCell);
+    rows.push(currentRow);
+  }
+
+  return rows;
 }
 
 function addUploadedTemplateOption(templateName, templateData) {
@@ -409,6 +521,54 @@ function applyVariablesToText(text, variableValues) {
   return outputText;
 }
 
+function buildPdfBlob(variableValues = getVariableValues()) {
+  if (typeof window.jspdf === "undefined") {
+    return null;
+  }
+
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF({
+    orientation: "portrait",
+    unit: "in",
+    format: getSelectedPageSize(),
+  });
+
+  const fontSize = Number(document.getElementById("font-size").value) || 12;
+  const marginTop = Number(document.getElementById("margin-top").value) || 1;
+  const marginRight =
+    Number(document.getElementById("margin-right").value) || 1;
+  const marginBottom =
+    Number(document.getElementById("margin-bottom").value) || 1;
+  const marginLeft = Number(document.getElementById("margin-left").value) || 1;
+  const pageWidth = pdf.internal.pageSize.getWidth();
+  const pageHeight = pdf.internal.pageSize.getHeight();
+  const usableWidth = pageWidth - marginLeft - marginRight;
+  const lineHeight = (fontSize / 72) * 1.35;
+  const fontFamily = getFontFamily();
+  const rawText = document.getElementById("letter").value;
+  const letterText = applyVariablesToText(rawText, variableValues);
+  const lines = pdf.splitTextToSize(letterText || "", usableWidth);
+
+  pdf.setFont(fontFamily, "normal");
+  pdf.setFontSize(fontSize);
+
+  let currentY = marginTop;
+
+  lines.forEach((line) => {
+    if (currentY + lineHeight > pageHeight - marginBottom) {
+      pdf.addPage();
+      pdf.setFont(fontFamily, "normal");
+      pdf.setFontSize(fontSize);
+      currentY = marginTop;
+    }
+
+    pdf.text(line, marginLeft, currentY);
+    currentY += lineHeight;
+  });
+
+  return pdf.output("blob");
+}
+
 function schedulePdfPreviewRender() {
   const previewContainer = document.querySelector(".preview");
   if (!previewContainer) {
@@ -474,56 +634,63 @@ function renderPdfPreview() {
   }
 
   const iframe = shell.querySelector(".preview-frame");
-
-  const { jsPDF } = window.jspdf;
-  const pdf = new jsPDF({
-    orientation: "portrait",
-    unit: "in",
-    format: getSelectedPageSize(),
-  });
-
-  const fontSize = Number(document.getElementById("font-size").value) || 12;
-  const marginTop = Number(document.getElementById("margin-top").value) || 1;
-  const marginRight =
-    Number(document.getElementById("margin-right").value) || 1;
-  const marginBottom =
-    Number(document.getElementById("margin-bottom").value) || 1;
-  const marginLeft = Number(document.getElementById("margin-left").value) || 1;
-  const pageWidth = pdf.internal.pageSize.getWidth();
-  const pageHeight = pdf.internal.pageSize.getHeight();
-  const usableWidth = pageWidth - marginLeft - marginRight;
-  const usableHeight = pageHeight - marginTop - marginBottom;
-  const lineHeight = (fontSize / 72) * 1.35;
-  const fontFamily = getFontFamily();
   const variableValues = getVariableValues();
-  const rawText = document.getElementById("letter").value;
-  const letterText = applyVariablesToText(rawText, variableValues);
-  const lines = pdf.splitTextToSize(letterText || "", usableWidth);
+  const pdfBlob = buildPdfBlob(variableValues);
+  if (!pdfBlob) {
+    return;
+  }
 
-  pdf.setFont(fontFamily, "normal");
-  pdf.setFontSize(fontSize);
-
-  let currentY = marginTop;
-
-  lines.forEach((line) => {
-    if (currentY + lineHeight > pageHeight - marginBottom) {
-      pdf.addPage();
-      pdf.setFont(fontFamily, "normal");
-      pdf.setFontSize(fontSize);
-      currentY = marginTop;
-    }
-
-    pdf.text(line, marginLeft, currentY);
-    currentY += lineHeight;
-  });
-
-  const pdfBlob = pdf.output("blob");
   const pdfUrl = URL.createObjectURL(pdfBlob);
 
   if (currentPreviewUrl) {
     URL.revokeObjectURL(currentPreviewUrl);
   }
   currentPreviewUrl = pdfUrl;
+  currentPdfBlob = pdfBlob;
 
   iframe.src = pdfUrl;
+}
+
+function generateBulkPdfZip() {
+  if (!csvRows.length) {
+    alert("Please upload a CSV file first.");
+    return;
+  }
+
+  if (typeof window.JSZip === "undefined") {
+    alert("ZIP support is not available right now.");
+    return;
+  }
+
+  const zip = new window.JSZip();
+  const baseTemplateName = (currentTemplateName || "bulk_template")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "_");
+
+  csvRows.forEach((row, index) => {
+    const pdfBlob = buildPdfBlob(row);
+    if (!pdfBlob) {
+      return;
+    }
+
+    const rowName = row.name || row.Name || `row_${index + 1}`;
+    const pdfFileName = `${baseTemplateName}_${
+      String(rowName)
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "_") || `row_${index + 1}`
+    }.pdf`;
+
+    zip.file(pdfFileName, pdfBlob);
+  });
+
+  zip.generateAsync({ type: "blob" }).then((content) => {
+    const downloadUrl = URL.createObjectURL(content);
+    const link = document.createElement("a");
+    link.href = downloadUrl;
+    link.download = `${baseTemplateName}_bulk_pdfs.zip`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(downloadUrl);
+  });
 }

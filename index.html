@@ -91,6 +91,32 @@
               hidden
             />
           </div>
+          <div class="csv-actions">
+            <label for="upload-csv-input" class="csv-upload-label">
+              Upload CSV for Bulk PDF
+            </label>
+            <input
+              type="file"
+              id="upload-csv-input"
+              accept="text/csv,.csv"
+              hidden
+            />
+            <button
+              type="button"
+              id="upload-csv-button"
+              class="template-action-button"
+            >
+              Choose CSV File
+            </button>
+            <button
+              type="button"
+              id="generate-bulk-pdf"
+              class="template-action-button"
+            >
+              Generate Bulk PDFs
+            </button>
+            <div id="csv-status" class="csv-status">No CSV uploaded.</div>
+          </div>
         </div>
         <div class="additional-info">
           <h2>Information</h2>
@@ -137,6 +163,7 @@
       crossorigin="anonymous"
     ></script>
     <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
     <script src="app.js"></script>
   </body>
 </html>
