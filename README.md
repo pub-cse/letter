@@ -2,6 +2,8 @@
 
 A powerful web-based application for generating, formatting, and managing bulk letters with advanced text markup, variable substitution, and PDF export capabilities.
 
+Live demo: https://nahidhe.me/Bulk-Letter-Generator/
+
 ## Features
 
 ### 📝 Core Features
@@ -393,7 +395,7 @@ Potential features for future versions:
 
 ## License
 
-Free to use and modify for personal or commercial purposes.
+This project is licensed under the MIT License. See [LICENSE](LICENSE) for the full text.
 
 ## Support
 
